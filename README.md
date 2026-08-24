@@ -1,6 +1,3 @@
-
-
-
 Backend: Python, FastAPI, SQLite, bcrypt (hash de senha)
 Frontend: Python, Streamlit
 Automação: n8n (envio de email ao criar agendamento)
@@ -8,6 +5,8 @@ Automação: n8n (envio de email ao criar agendamento)
 ## Como rodar o projeto
 
 Backend:
+
+https://github.com/rafaelnovakalberto-gif/BarbeariaVintage-Backend
 
 ```bash
 cd backend
@@ -18,15 +17,10 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Crie o primeiro usuário (funcionário autorizado a acessar o sistema):
+Crie o primeiro usuário (administrador):
 
-```bash
-python
->>> import database
->>> database.create_tables()
->>> database.create_user("seu_usuario", "sua_senha")
->>> exit()
-```
+rode o uvircorn em um terminal, em outro, adicione o adminstrador rodando:
+python seed.py
 
 Ligue o servidor:
 
@@ -37,6 +31,8 @@ uvicorn main:app --reload
 A API vai rodar em `http://localhost:8000`.
 
 Frontend:
+
+https://github.com/rafaelnovakalberto-gif/BarbeariaVintage_Frontend
 
 Em outro terminal:
 
@@ -68,6 +64,3 @@ para utiliza-lo basta importar o arquivo `n8n-workflow.json` dentro da platarfor
 - Visualização da agenda organizada por data e horário
 - Envio automático de email de confirmação ao cliente, via n8n, quando um agendamento é criado
 
-Crie o primeiro usuário (administrador):
-
-python seed.py
