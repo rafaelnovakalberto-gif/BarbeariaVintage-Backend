@@ -10,7 +10,9 @@ if "token" not in st.session_state:
 
 
 def tela_login():
-    st.title("💈 Barbearia Vintage")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.image("assets/logo_barbearia_semfundo.png", width=2000)
     st.subheader("Login")
 
     username = st.text_input("Usuário")
@@ -149,7 +151,7 @@ def aba_agendamentos():
 if st.session_state.token is None:
     tela_login()
 else:
-    st.sidebar.title("💈 Barbearia Vintage")
+    st.sidebar.image("assets/logo_barbearia_semfundo.png", width=350)
     if st.sidebar.button("Sair"):
         st.session_state.token = None
         st.rerun()
