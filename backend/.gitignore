@@ -1,2 +1,3 @@
 barbearia.db
 .env
+__pycache__/
