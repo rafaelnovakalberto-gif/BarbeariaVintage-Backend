@@ -19,7 +19,7 @@ app.add_middleware(
 
 active_tokens = set()
 
-N8N_WEBHOOK_URL = "https://SEU-N8N.app.n8n.cloud/webhook/novo-agendamento"
+N8N_WEBHOOK_URL = "https://rafaelnovakalberto.app.n8n.cloud/webhook/cca70a2a-f25e-4375-957b-72ab41423c83"
 
 def check_auth(token: str):
     if token not in active_tokens:
@@ -83,11 +83,13 @@ def get_appointments(token: str):
 def post_appointment(appt: AppointmentRequest, token: str):
     check_auth(token)
     new_id = database.create_appointment(appt.client_id, appt.date, appt.time, appt.service)
+    client = database.get_client(appt.client_id)
 
     try:
         requests.post(N8N_WEBHOOK_URL, json={
             "appointment_id": new_id,
-            "client_id": appt.client_id,
+            "client_name": client["name"] if client else "Cliente",
+            "client_email": client["email"] if client else None,
             "date": appt.date,
             "time": appt.time,
             "service": appt.service,

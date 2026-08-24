@@ -61,6 +61,12 @@ def create_appointment(client_id, date, time, service):
     conn.close()
     return new_id
 
+def get_client(client_id):
+    conn = get_connection()
+    row = conn.execute("SELECT * FROM clients WHERE id = ?", (client_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
 def hash_password(password):
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
