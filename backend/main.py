@@ -1,12 +1,17 @@
+import os
 import secrets
 import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from dotenv import load_dotenv
+
 
 import database
 
 database.create_tables()
+
+load_dotenv()
 
 app = FastAPI(title="Barbearia Vintage API")
 
@@ -19,7 +24,7 @@ app.add_middleware(
 
 active_tokens = set()
 
-N8N_WEBHOOK_URL = "https://rafaelnovakalberto.app.n8n.cloud/webhook/cca70a2a-f25e-4375-957b-72ab41423c83"
+N8N_WEBHOOK_URL = os.environ.get("N8N_WEBHOOK_URL")
 
 def check_auth(token: str):
     if token not in active_tokens:

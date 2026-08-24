@@ -99,7 +99,7 @@ def list_clients():
 
 def list_appointments():
     conn = get_connection()
-    rows = conn.execute("SELECT * FROM appointments ORDER BY date DESC, time DESC").fetchall()
+    rows = conn.execute("SELECT * FROM appointments ORDER BY date, time").fetchall()
     conn.close()
     return [dict(row) for row in rows]
 
