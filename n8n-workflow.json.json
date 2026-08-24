@@ -1,0 +1,71 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cca70a2a-f25e-4375-957b-72ab41423c83",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "94da01d2-d346-483b-9eb3-dfbb53387d42",
+      "name": "Webhook",
+      "webhookId": "cca70a2a-f25e-4375-957b-72ab41423c83"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.body.client_email }}",
+        "subject": "Agendamento confirmado - Barbearia Vintage",
+        "message": "=Olá! {{ $json.body.client_name }}, tudo bem?\n\nSeu agendamento na Barbearia Vintage foi confirmado com sucesso:\n\nData: {{ $json.body.date }}\nHorário: {{ $json.body.time }}\nServiço: {{ $json.body.service }}\n\nAté a próxima!",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "91163610-5482-4c20-a1e6-d637fd06f25b",
+      "name": "Send a message",
+      "webhookId": "317cd8ea-6ed6-4e85-9be7-2311b7b57bea",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "E4euhnjwC1Ov14Uo",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ceda51ab-1d1d-44b2-8355-c5f1206eca00",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "75cf20e54dc5659ef61ba588d5eebc0164b5fbe2fa965996e136600f17c20746"
+  },
+  "nodeGroups": [],
+  "id": "pvFLTPR1ohBU6cOu",
+  "tags": []
+}
