@@ -58,6 +58,11 @@ def aba_clientes():
     if not clientes:
         st.info("Nenhum cliente cadastrado ainda.")
         return
+    
+    busca = st.text_input("Buscar cliente por nome")
+
+    if busca:
+        clientes = [c for c in clientes if busca.lower() in c["name"].lower()]
 
     for cliente in clientes:
         with st.expander(f"{cliente['name']} (id {cliente['id']})"):
@@ -126,6 +131,14 @@ def aba_agendamentos():
 
     ids_para_nomes = {c["id"]: c["name"] for c in clientes}
 
+    status_filtro = st.selectbox(
+        "Filtrar por status",
+        ["Todos", "agendado", "concluído", "cancelado", "não compareceu"]
+    )
+
+    if status_filtro != "Todos":
+        agendamentos = [a for a in agendamentos if a["status"] == status_filtro]
+    
     for appt in agendamentos:
         nome_cliente = ids_para_nomes.get(appt["client_id"], "Cliente removido")
         with st.expander(f"{appt['date']} {appt['time']} - {nome_cliente} ({appt['status']})"):
@@ -133,8 +146,8 @@ def aba_agendamentos():
 
             novo_status = st.selectbox(
                 "Status",
-                ["agendado", "concluido", "cancelado", "nao_compareceu"],
-                index=["agendado", "concluido", "cancelado", "nao_compareceu"].index(appt["status"]),
+                ["agendado", "concluído", "cancelado", "não compareceu"],
+                index=["agendado", "concluído", "cancelado", "não compareceu"].index(appt["status"]),
                 key=f"status_{appt['id']}",
             )
 
@@ -169,17 +182,33 @@ def aba_funcionarios():
                 st.rerun()
 
     usuarios = requests.get(f"{API_URL}/users?token={token}").json()
+
+    busca_func = st.text_input("🔍 Buscar funcionário")
+
+    if busca_func:
+        usuarios = [u for u in usuarios if busca_func.lower() in u["username"].lower()]
+
     for u in usuarios:
-        col1, col2 = st.columns([3, 1])
-        col1.write(f"{u['username']} ({u['role']})")
-        if col2.button("Remover", key=f"remover_user_{u['id']}"):
-            requests.delete(f"{API_URL}/users/{u['id']}?token={token}")
-            st.rerun()
+        with st.expander(f"{u['username']} ({u['role']})"):
+            nova_senha = st.text_input("Nova senha", type="password", key=f"senha_{u['id']}")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("Atualizar senha", key=f"atualizar_senha_{u['id']}"):
+                    if nova_senha:
+                        requests.put(f"{API_URL}/users/{u['id']}/password?token={token}",
+                            json={"new_password": nova_senha})
+                        st.success("Senha atualizada!")
+                    else:
+                        st.warning("Digite uma senha antes de salvar.")
+            with col2:
+                if st.button("Remover funcionário", key=f"remover_user_{u['id']}"):
+                    requests.delete(f"{API_URL}/users/{u['id']}?token={token}")
+                    st.rerun()
 
 if st.session_state.token is None:
     tela_login()
 else:
-    st.sidebar.image("assets/logo_barbearia_semfundo.png", width=150)
+    st.sidebar.image("assets/logo_barbearia_semfundo.png", width=400)
     if st.sidebar.button("Sair"):
         st.session_state.token = None
         st.session_state.role = None

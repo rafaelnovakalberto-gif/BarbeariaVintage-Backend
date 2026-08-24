@@ -136,6 +136,13 @@ def update_appointment_status(appointment_id, new_status):
     conn.commit()
     conn.close()
 
+def update_user_password(user_id, new_password):
+    conn = get_connection()
+    password_hash = hash_password(new_password)
+    conn.execute("UPDATE users SET password_hash = ? WHERE id = ?", (password_hash, user_id))
+    conn.commit()
+    conn.close()
+
 def delete_client(client_id):
     conn = get_connection()
     conn.execute(

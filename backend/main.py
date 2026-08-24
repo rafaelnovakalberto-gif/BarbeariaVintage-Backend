@@ -53,6 +53,9 @@ class UserRequest(BaseModel):
     password: str
     role: str = "funcionario"
 
+class PasswordRequest(BaseModel):
+    new_password: str
+
 @app.post("/login")
 def login(data: LoginRequest):
     usuario = database.verify_login(data.username, data.password)
@@ -147,3 +150,10 @@ def delete_user_route(user_id: int, token: str):
 app.add_api_route("/users", get_users, methods=["GET"])
 app.add_api_route("/users", post_user, methods=["POST"])
 app.add_api_route("/users/{user_id}", delete_user_route, methods=["DELETE"])
+
+def put_user_password(user_id: int, data: PasswordRequest, token: str):
+    check_admin(token)
+    database.update_user_password(user_id, data.new_password)
+    return {"ok": True}
+
+app.add_api_route("/users/{user_id}/password", put_user_password, methods=["PUT"])
