@@ -67,3 +67,7 @@ para utiliza-lo basta importar o arquivo `n8n-workflow.json` dentro da platarfor
 - Criação, edição de status e remoção de agendamentos
 - Visualização da agenda organizada por data e horário
 - Envio automático de email de confirmação ao cliente, via n8n, quando um agendamento é criado
+
+Crie o primeiro usuário (administrador):
+
+python seed.py

@@ -8,6 +8,8 @@ st.set_page_config(page_title="Barbearia Vintage", page_icon="💈")
 if "token" not in st.session_state:
     st.session_state.token = None
 
+if "role" not in st.session_state:        
+    st.session_state.role = None     
 
 def tela_login():
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -21,10 +23,14 @@ def tela_login():
     if st.button("Entrar"):
         resposta = requests.post(f"{API_URL}/login", json={"username": username, "password": password})
         if resposta.status_code == 200:
-            st.session_state.token = resposta.json()["token"]
+            resposta_json = resposta.json()                      
+            st.session_state.token = resposta_json["token"]      
+            st.session_state.role = resposta_json["role"]        
             st.rerun()
         else:
             st.error("Usuário ou senha incorretos")
+
+
 
 
 def aba_clientes():
@@ -147,17 +153,49 @@ def aba_agendamentos():
                     st.success("Removido!")
                     st.rerun()
 
+def aba_funcionarios():
+    st.header("Funcionários")
+    token = st.session_state.token
+
+    with st.expander("➕ Novo funcionário"):
+        username = st.text_input("Usuário", key="novo_func_user")
+        password = st.text_input("Senha", type="password", key="novo_func_pass")
+        role = st.selectbox("Papel", ["funcionario", "admin"])
+        if st.button("Salvar funcionário"):
+            resposta = requests.post(f"{API_URL}/users?token={token}",
+                json={"username": username, "password": password, "role": role})
+            if resposta.status_code == 200:
+                st.success("Funcionário criado!")
+                st.rerun()
+
+    usuarios = requests.get(f"{API_URL}/users?token={token}").json()
+    for u in usuarios:
+        col1, col2 = st.columns([3, 1])
+        col1.write(f"{u['username']} ({u['role']})")
+        if col2.button("Remover", key=f"remover_user_{u['id']}"):
+            requests.delete(f"{API_URL}/users/{u['id']}?token={token}")
+            st.rerun()
 
 if st.session_state.token is None:
     tela_login()
 else:
-    st.sidebar.image("assets/logo_barbearia_semfundo.png", width=350)
+    st.sidebar.image("assets/logo_barbearia_semfundo.png", width=150)
     if st.sidebar.button("Sair"):
         st.session_state.token = None
+        st.session_state.role = None
         st.rerun()
 
-    aba1, aba2 = st.tabs(["Clientes", "Agenda"])
-    with aba1:
-        aba_clientes()
-    with aba2:
-        aba_agendamentos()
+    if st.session_state.role == "admin":
+        aba1, aba2, aba3 = st.tabs(["Clientes", "Agenda", "Funcionários"])
+        with aba1:
+            aba_clientes()
+        with aba2:
+            aba_agendamentos()
+        with aba3:
+            aba_funcionarios()
+    else:
+        aba1, aba2 = st.tabs(["Clientes", "Agenda"])
+        with aba1:
+            aba_clientes()
+        with aba2:
+            aba_agendamentos()

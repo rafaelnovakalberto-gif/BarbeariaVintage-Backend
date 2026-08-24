@@ -22,7 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-active_tokens = set()
+active_tokens = {}
 
 N8N_WEBHOOK_URL = os.environ.get("N8N_WEBHOOK_URL")
 
@@ -48,13 +48,24 @@ class AppointmentRequest(BaseModel):
 class StatusRequest(BaseModel):
     status: str
 
+class UserRequest(BaseModel):
+    username: str
+    password: str
+    role: str = "funcionario"
+
 @app.post("/login")
 def login(data: LoginRequest):
-    if not database.verify_login(data.username, data.password):
+    usuario = database.verify_login(data.username, data.password)
+    if not usuario:
         raise HTTPException(status_code=401, detail="Usuário ou senha incorretos")
     token = secrets.token_hex(16)
-    active_tokens.add(token)
-    return {"token": token}
+    active_tokens[token] = usuario
+    return {"token": token, "role": usuario["role"]}
+
+def check_admin(token: str):
+    check_auth(token)
+    if active_tokens[token]["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores")
 
 def get_clients(token: str):
     check_auth(token)
@@ -118,3 +129,21 @@ app.add_api_route("/appointments", get_appointments, methods=["GET"])
 app.add_api_route("/appointments", post_appointment, methods=["POST"])
 app.add_api_route("/appointments/{appointment_id}/status", put_appointment_status, methods=["PUT"])
 app.add_api_route("/appointments/{appointment_id}", delete_appointment_route, methods=["DELETE"])
+
+def get_users(token: str):
+    check_admin(token)
+    return database.list_users()
+
+def post_user(user: UserRequest, token: str):
+    check_admin(token)
+    new_id = database.create_user(user.username, user.password, user.role)
+    return {"id": new_id}
+
+def delete_user_route(user_id: int, token: str):
+    check_admin(token)
+    database.delete_user(user_id)
+    return {"ok": True}
+
+app.add_api_route("/users", get_users, methods=["GET"])
+app.add_api_route("/users", post_user, methods=["POST"])
+app.add_api_route("/users/{user_id}", delete_user_route, methods=["DELETE"])

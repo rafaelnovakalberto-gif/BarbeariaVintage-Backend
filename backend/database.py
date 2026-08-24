@@ -33,9 +33,11 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
-            password_hash TEXT NOT NULL
+            password_hash TEXT NOT NULL,
+            role TEXT NOT NULL DEFAULT 'funcionario'
         )
     """)
+
     conn.commit()
     conn.close()
 
@@ -70,26 +72,39 @@ def get_client(client_id):
 def hash_password(password):
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
-def create_user(username, password):
+def create_user(username, password, role="funcionario"):
     conn = get_connection()
     password_hash = hash_password(password)
     cursor = conn.execute(
-        "INSERT INTO users (username, password_hash) VALUES (?, ?)",
-        (username, password_hash)
+        "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
+        (username, password_hash, role)
     )
     conn.commit()
     new_id = cursor.lastrowid
     conn.close()
     return new_id
+
 def verify_login(username, password):
     conn = get_connection()
     row = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
     conn.close()
-
     if row is None:
-        return False  # usuário não existe
+        return None
+    if bcrypt.checkpw(password.encode(), row["password_hash"].encode()):
+        return {"username": row["username"], "role": row["role"]}
+    return None
 
-    return bcrypt.checkpw(password.encode(), row["password_hash"].encode())
+def list_users():
+    conn = get_connection()
+    rows = conn.execute("SELECT id, username, role FROM users").fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+def delete_user(user_id):
+    conn = get_connection()
+    conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
 
 def list_clients():
     conn = get_connection()
